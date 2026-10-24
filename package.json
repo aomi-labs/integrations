@@ -1,0 +1,16 @@
+{
+  "name": "@aomi-labs/ext-task-api-shadow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sell Aomi Task API builds through a Shadow sponsored credit line on Arc testnet",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "setup": "git submodule update --init && (cd vendor/shadow/app && pnpm install --frozen-lockfile --ignore-workspace) && (cd vendor/product-mono/examples/task-api && npm ci)",
+    "start": "node server.mjs",
+    "test": "node --test \"test/**/*.test.mjs\""
+  }
+}
