@@ -1,5 +1,5 @@
 {
-  "name": "@aomi-labs/ext-task-api-shadow",
+  "name": "@aomi-labs/integrations-shadow",
   "version": "0.1.0",
   "private": true,
   "description": "Sell Aomi Task API builds through a Shadow sponsored credit line on Arc testnet",
