@@ -1,6 +1,6 @@
 [submodule "vendor/shadow"]
-	path = vendor/shadow
+	path = shadow/vendor/shadow
 	url = https://github.com/buildwithshadow/shadow
 [submodule "vendor/product-mono"]
-	path = vendor/product-mono
+	path = shadow/vendor/product-mono
 	url = https://github.com/aomi-labs/product-mono
