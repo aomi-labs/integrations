@@ -24,8 +24,6 @@ The partner's service becomes an Aomi app: a Rust `cdylib` crate that Aomi's run
 | [ReasoningReceipt](https://github.com/tang-vu/reasoning-receipt) | Arc testnet 5042002 | Two apps: `reasoning-receipt-audit` (Aomi audits the reasoner's trace, seals and publishes the receipt) and `reasoning-receipt/settlement` (wallet-approved USDC settlement, gated on a published audit). Build-time deployment JSON generates the chain, contract and selector guard | `integrations/aomi` and `integrations/aomi-audit` in the ReasoningReceipt repository (our fork: `CeciliaZ030/reasoning-receipt`, PRs #1 and #2) |
 | [Trustless Work](https://www.trustlesswork.com) | Arc testnet 5042002 | Turns a service agreement into a single-release escrow: the Trustless Work Arc API builds the unsigned deploy, the app decodes and checks it field by field, the user reviews, the host simulates. Never signs or broadcasts | `CeciliaZ030/ext-trustless-app` (source of truth), handed to the partner as a patch for `trustlesswork-smart-contract-arc` |
 | [Mandate](https://mandate-three-pi.vercel.app) | Arc mainnet | `mandate-agent`: read-only tools for treasury status, bills, decisions, decision records and Arc events of a USDC budget with hard limits (Morpho ERC-4626 venue) | `aomi/mandate-agent` in `CeciliaZ030/mandate` |
-| [Byreal](https://byreal.io) | Solana | White-labeled platform apps: `byreal` (spot, Hyperliquid perps, copy-farming analytics, reward claims), `byreal-lp` (CLMM positions), `byreal-copy-trade`, `byreal-strategies` (DCA, idle yield, stop-loss, take-profit on the host scheduler) | `aomi-labs/byreal-apps` |
-| Helixa (AgentDNA) | none, public API reads | v0 read-only: search agents, agent profile, Cred check, compare agents | `helixa/` in `CeciliaZ030/helixa-aomi-app-v0` |
 | Steward (LiqSteward), Aomi-built | Ethereum (Morpho vaults) | Manager-controlled vault operations: turns a risk signal into alternatives, validates the plan against fresh chain state, runs the calldata through stage-and-simulate and produces an unsigned Safe package. Apps `liqsteward`, `liqsteward-core`, `nav-oracle` | `aomi-app/` in `aomi-labs/liqsteward` |
 | Hoodit, Aomi-built | Robinhood Chain | Token and launchpad discovery, market research, exit checks and user-authorized trades; nine read tools over Codex, LI.FI and chain transport. The site mounts the Aomi widget at `/app` | `apps/hoodit/` in `aomi-labs/hoodit-apps` (private) |
 
@@ -37,7 +35,6 @@ A partner with several apps gets a platform repository. The Aomi backend stages 
 | --- | --- |
 | `somm.finance` | `aomi-labs/somm-finance-apps` |
 | `world-market-apps` | `aomi-labs/world-market-apps` |
-| `byreal` | `aomi-labs/byreal-apps` |
 | `krexa` | `aomi-labs/krexa-hosted-apps` |
 | `community` (anyone) | `aomi-labs/community-apps` |
 
@@ -64,7 +61,7 @@ Not an app but a surface. Used by ACR's terminal, Somm's `/copilot`, Hoodit's `/
 
 **Aomi as the runtime (plugin, elsewhere).** The partner's service becomes an Aomi app: a Rust crate pinned to an exact `aomi-sdk` version with `.aomi/config.json`, `aomi.toml` and a committed `Cargo.lock`. Two sub-shapes recur:
 
-- *Forwarder.* Each tool calls the partner's existing HTTP API and re-implements nothing (Somm, ACR, Mandate, Helixa, Trustless Work's deploy builder). The runtime loads only compiled Rust plugins, not MCP servers, so a partner with an MCP proxy writes the Rust mirror of it.
+- *Forwarder.* Each tool calls the partner's existing HTTP API and re-implements nothing (Somm, ACR, Mandate, Trustless Work's deploy builder). The runtime loads only compiled Rust plugins, not MCP servers, so a partner with an MCP proxy writes the Rust mirror of it.
 - *Direct chain reader with guarded execution.* The app reads the partner's contracts itself and, where it executes, ships the guard table the host enforces: a build-time deployment file that generates the chain, contract and selector guard, `simulate_batch` before any commit, and independent verification of what the partner's API returns (World Markets, ReasoningReceipt, Steward). The user's wallet signs everything; the app never signs on its own.
 
 Either way the app lives in the partner's repository and is deployed through Aomi Build onto a partner platform, or onto `community` when the partner has only one app.
