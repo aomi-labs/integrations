@@ -73,6 +73,26 @@ The request id is `aomi-task:` plus the SHA-256 of the canonical registration (k
 
 `status` is `price_exceeded` (with `requiredPrice`, `pricing` and `summary`, no `bundle`) when the measured cost did not fit the stake, or `preparation_failed` / `preparation_expired` (with `error`) when Aomi could not prepare the task; `charged` and `refund` say where the stake went in every case. `resultRef` in the `DeliveryReceipt` is the Task API result URL. The Shadow `DeliveryReceipt` binds these exact bytes (`resultHash`); the Task API `attestation` binds the request, payer, price and `payloadHash` under Aomi's JWKS (`/.well-known/jwks.json`). Verify both independently; `bundle` is untrusted input until you have.
 
+## Testnet only: where the money moves
+
+Every transfer in this pilot is on Arc testnet `5042002` in test USDC (`0x3600000000000000000000000000000000000000`). No mainnet address and no real USDC is involved on either side, verified on 2026-10-27 against the live staging endpoint.
+
+| Leg | Chain | Asset | Contract or endpoint |
+| --- | --- | --- | --- |
+| Sponsor → provider (Shadow line, stake) | Arc testnet `5042002` | test USDC | `ShadowFloatPublicTestnet` `0xB31d9e17410B10a619B66dF0c31f59acbb33B553` |
+| Provider → Aomi (x402, 0.01 preparation + 3% retrieval) | `eip155:5042002` | test USDC | Circle Gateway `0x0077777d7eba4688bdef3e311b846f25870a19b9`, facilitator `gateway-api-testnet.circle.com`, payTo `0xdA65d415cC9d5dDC2a08Bdffc996750755fc3CF0` |
+| Provider → agent line (refund of `stake − cost`) | Arc testnet `5042002` | test USDC | `repay()` on the Shadow contract |
+
+The staging Task API chooses the payment rail from the task's `chainId`: a `5042002` build is quoted on the testnet Gateway, and a `5042` build is refused on staging for an anonymous caller (`forbidden`). This server only registers `chainId 5042002` tasks (`FLOAT_MAINNET_EXPECTED_CHAIN_ID`), so a mainnet quote cannot be reached through it. The "Arc mainnet" wording in the Task API announcement and in the vendored client README describes the production endpoint, which this pilot never calls.
+
+Funding the host's x402 payer (`AOMI_TASK_PAYER_PRIVATE_KEY`), once:
+
+1. Get test USDC for the payer from the [Circle faucet](https://faucet.circle.com) (Arc Testnet). Arc pays gas in USDC, so the same balance covers gas.
+2. Deposit part of it into the Gateway wallet, which is what the x402 authorization spends. The vendored Circle client does it in one call (`new GatewayClient({ chain: "arcTestnet", privateKey, rpcUrl: ARC_RPC_URL }).deposit("1.00")`), or call `deposit(usdc, amount)` on the Gateway contract after an `approve`. One test USDC covers about a hundred preparations.
+3. `getBalances().gateway.available` must cover the quoted amount; the client never deposits on its own.
+
+The provider key (`FLOAT_PROVIDER_PRIVATE_KEY`) only needs faucet USDC for refund gas. Neither key ever holds the sponsor's or the agent's funds beyond one purchase.
+
 ## Run
 
 Node 22.18 or later (the Task client is TypeScript loaded with Node's type stripping), pnpm for the Shadow app.
